@@ -68,7 +68,7 @@
     <h1>Harvestify</h1>
     <div class="container">
         <h2>Create New Password</h2>
-        <form action="/new-password" method="post">
+        <form id="reset-password-form">
             <div class="form-group">
                 <label for="new-password">New Password</label>
                 <input type="password" id="new-password" name="new-password" required>
@@ -80,5 +80,48 @@
             <button type="submit" class="btn">Submit</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('reset-password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (!token) {
+                alert("Token is missing from the URL");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            fetch(`localhost:5000/user/reset-password/${token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    newPassword: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "SUCCESS") {
+                    alert("Password reset successful");
+                } else {
+                    alert("Failed to reset password: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while resetting the password");
+            });
+        });
+    </script>
 </body>
 </html>
